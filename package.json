@@ -1,0 +1,12 @@
+{
+  "name": "proyecto-alexis",
+  "version": "1.0.0",
+  "description": "Proyecto Node.js básico con CI",
+  "scripts": {
+    "build": "echo '🚀 Build ejecutado correctamente'",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

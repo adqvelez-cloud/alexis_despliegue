@@ -1,0 +1,31 @@
+name: Node.js CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Descargar el código del repositorio
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configurar Node.js versión 22.20.0
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.20.0
+          cache: 'npm'
+
+      # 3️⃣ Instalar dependencias
+      - name: Instalar dependencias
+        run: npm ci
+
+      # 4️⃣ Ejecutar pruebas
+      - name: Ejecutar pruebas
+        run: npm test
+
+      # 5️⃣ (Opcional) Ejecutar build si existe
+      - name: Ejecutar build
+        run: npm run build --if-present
