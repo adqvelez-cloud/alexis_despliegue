@@ -1,31 +1,57 @@
-name: Node.js CI
+name: Node.js CI + Docker Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - alexis  # o la rama que uses
+  pull_request:
+    branches:
+      - alexis
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Descargar el código del repositorio
+      # 1️⃣ Descargar el código
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Configurar Node.js versión 22.20.0
+      # 2️⃣ Configurar Node.js versión 22
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.20.0
+          node-version: 22
           cache: 'npm'
 
       # 3️⃣ Instalar dependencias
       - name: Instalar dependencias
-        run: npm ci
+        run: npm install
 
-      # 4️⃣ Ejecutar pruebas
-      - name: Ejecutar pruebas
+      # 4️⃣ Ejecutar tests
+      - name: Ejecutar tests
         run: npm test
 
       # 5️⃣ (Opcional) Ejecutar build si existe
       - name: Ejecutar build
         run: npm run build --if-present
+
+      # 6️⃣ Construir imagen Docker
+      - name: Construir imagen Docker
+        run: docker build -t proyecto-alexis:${{ github.sha }} .
+
+      # 7️⃣ Login a GitHub Container Registry
+      - name: Login a GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # 8️⃣ Tag y push imagen
+      - name: Publicar imagen en GHCR
+        run: |
+          docker tag proyecto-alexis:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/proyecto-alexis:latest
+          docker tag proyecto-alexis:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/proyecto-alexis:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/proyecto-alexis:latest
+          docker push ghcr.io/${{ github.repository_owner }}/proyecto-alexis:${{ github.sha }}
